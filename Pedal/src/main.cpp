@@ -104,9 +104,9 @@ parse_set_state_msg()
 {
     //while (Serial.available() <= 0);
     delay(100);
-    Serial.read();
 
     struct s_set_state_msg msg;
+    memset(&msg, 0, sizeof (struct s_set_state_msg));
 
     for (int i = 0; i < POT_CNT; i++)
     {
@@ -268,15 +268,13 @@ void apply_preset(struct s_set_state_msg msg)
     }
 }
 
-long pot = 0;
-
 void setup()
 {
     Serial.begin(115200);
+    SPI.begin();
     INIT_POTS()
     INIT_BTNS()
     pinMode(LED_MANUAL, OUTPUT);
-    SPI.begin();
 
     //Init pot values
     for (int i = 0; i < POT_CNT; i++)
@@ -284,15 +282,15 @@ void setup()
             readPot(pots[i].analog_pin, float(pots[i].ohmm_resistor));
 
     //Init btn value
-    for (int i = 0; i < BTN_CNT; i++)
-        btns[i].state = readBtn(btns[i].analog_pin);
+    //for (int i = 0; i < BTN_CNT; i++)
+        //btns[i].state = readBtn(btns[i].analog_pin);
 
     delay(300);
+    pinMode(7, OUTPUT);
 }
 
 void manual_loop()
 {
-    long pot_val = 0;
     float ratio = 0.0;
     long percent = 0;
 
@@ -316,7 +314,6 @@ void manual_loop()
             writeBtn(btns[i], !btns[i].state);
             btns[i].state = !btns[i].state;
             manual = true;
-            delay(100);
         }
 
     }
@@ -326,14 +323,13 @@ void loop()
 {
     digitalWrite(LED_MANUAL, manual);
 
-    manual_loop();
-
     char req = Serial.read();
     char* data = 0;
 
     if (req == 'S')
     {
         manual = false;
+        delay(100);
         Serial.read();
         apply_preset(parse_set_state_msg());
     }
@@ -355,4 +351,6 @@ void loop()
         for (int i = 0; i < (sizeof (struct s_req_state_msg)); i++)
             Serial.print((char) data[i]);
     }
+
+    manual_loop();
 }
