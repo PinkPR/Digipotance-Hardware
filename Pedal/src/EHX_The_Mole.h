@@ -27,16 +27,6 @@
 # define INIT_BTNS()        \
     btns[0] = init_btn(6, 9, A3, false, "Power");
 
-/*struct pot
-{
-    int analog_pin;
-    int cs_pin;
-    int range;
-    int max_resistor;
-    int ohmm_resistor;
-    char* name;
-};*/
-
 struct s_pot pots[POT_CNT];
 struct s_btn btns[BTN_CNT];
 

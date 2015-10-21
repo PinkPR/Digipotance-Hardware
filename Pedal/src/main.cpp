@@ -100,9 +100,11 @@ init_btn(int digital_pin,
 }
 
 struct s_set_state_msg
-parse_set_state_msg(void)
+parse_set_state_msg()
 {
+    //while (Serial.available() <= 0);
     delay(100);
+    Serial.read();
 
     struct s_set_state_msg msg;
 
@@ -192,6 +194,8 @@ void writeDigiPot(struct s_pot pot, long value)
     int val =
         int(range * (float(value) / max_resistor) / float(pot_cnt));
 
+    val = int(range) - val;
+
     if (val > int(range))
         return;
 
@@ -263,6 +267,8 @@ void apply_preset(struct s_set_state_msg msg)
         btn_preset_vals[i] = msg.btn_values[i];
     }
 }
+
+long pot = 0;
 
 void setup()
 {
