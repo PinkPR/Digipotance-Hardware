@@ -1,65 +1,148 @@
 #include <Arduino.h>
-#include <LiquidCrystal.h>
 
+#include <LiquidCrystal.h>
+#include "Pedalboard.h"
 #include "DigitDisplay.h"
 
 #define P1  8
 #define P2  9
 
-int state = 0;
-int n = 0;
-int inputs[] = { P1, P2 };
 DigitDisplay display(5, 6, 7, 8, 9, 10, 11, 12);
-LiquidCrystal lcd1(40, 41, 42, 30, 31, 32, 33);
 
-void updateState(int *inputs, int input_cnt)
+LiquidCrystal s1 = LiquidCrystal(36, 37, 38, 26, 27, 28, 29);
+LiquidCrystal s2 = LiquidCrystal(40, 41, 42, 30, 31, 32, 33);
+
+LiquidCrystal* screens[BANK_COUNT] = { &s1, &s2 };
+
+int preset_inputs[PRESET_COUNT] = { 46, 47 };
+int bank_inputs[2] = { 48, 49 };
+
+int bank = 1;
+int current_preset = 0;
+bool init_done = false;
+bool screen_update = false;
+char presets[BANK_COUNT * PRESET_COUNT * PRESET_NAME_LEN];
+
+void get_data()
 {
-    for (int i = 0; i < input_cnt; i++)
+    delay(100);
+    Serial.read();
+
+    for (int i = 0; i < (BANK_COUNT * PRESET_COUNT * PRESET_NAME_LEN); i++)
     {
-        if (digitalRead(inputs[i]))
-            state = inputs[i];
+        ((char*) presets)[i] = Serial.read();
+
+        if (presets[i] == -1)
+            i--;
+    }
+
+    bank = 1;
+    display.print(bank);
+
+    for (int j = 0; j < PRESET_COUNT; j++)
+    {
+        screens[j]->clear();
+        screens[j]->setCursor(0, 0);
+        screens[j]->print(((char*) presets)[PRESET_NAME_LEN * j]);
+    }
+
+    screen_update = true;
+}
+
+void bank_inputs_loop()
+{
+    if (digitalRead(bank_inputs[0]))
+    {
+        screen_update = true;
+        bank++;
+        if (bank > BANK_COUNT)
+            bank = 1;
+        delay(100);
+    }
+    else if (digitalRead(bank_inputs[1]))
+    {
+        screen_update = true;
+        bank--;
+        if (bank < 1)
+            bank = BANK_COUNT;
+        delay(100);
+    }
+
+    display.print(bank);
+}
+
+void preset_inputs_loop()
+{
+    for (int i = 0; i < PRESET_COUNT; i++)
+    {
+        if (digitalRead(preset_inputs[i]))
+        {
+            current_preset = i;
+            Serial.print("S\n");
+            Serial.print((char) (bank - 1) * PRESET_COUNT + current_preset);
+            Serial.print('\n');
+            delay(500);
+        }
+    }
+}
+
+void screens_update_loop()
+{
+    if (!screen_update)
+        return;
+
+    screen_update = false;
+
+    for (int j = 0; j < PRESET_COUNT; j++)
+    {
+        screens[j]->clear();
+        screens[j]->setCursor(0, 0);
+        screens[j]->print((char*) presets + (((bank - 1) * PRESET_COUNT + j) * PRESET_NAME_LEN));
     }
 }
 
 void setup()
 {
-    state = inputs[0];
-    //pinMode(P1, INPUT);
-    //pinMode(P2, INPUT);
-    pinMode(22, INPUT);
-    pinMode(23, INPUT);
-
-    lcd1.begin(16, 2);
-    lcd1.display();
-
     Serial.begin(115200);
+
+    for (int i = 0; i < 2; i++)
+    {
+        screens[i]->begin(16, 2);
+        screens[i]->clear();
+        screens[i]->print("No Data");
+    }
+
+    display.print(PRINT_POINT);
+
+    for (int i = 0; i < PRESET_COUNT; i++)
+        pinMode(preset_inputs[i], INPUT);
+
+    pinMode(bank_inputs[0], INPUT);
+    pinMode(bank_inputs[1], INPUT);
 }
 
 void loop()
 {
-    display.print(n + 1);
-    lcd1.print(n + 1);
-
-    if (digitalRead(22))
-    {
-        n++;
-        n %= 10;
-        delay(500);
-    }
-    else if (digitalRead(23))
-    {
-        if (n > 0)
-            n--;
-        else
-            n = 9;
-        delay(500);
-    }
-
-    /*updateState(inputs, 2);
-
-    if (Serial.available() > 0)
+    if (!init_done)
     {
         if (Serial.read() == 'S')
-            Serial.print(state);
-    }*/
+        {
+            get_data();
+            init_done = true;
+        }
+        else
+        {
+            return;
+        }
+    }
+
+    if (Serial.read() == 'S')
+    {
+        get_data();
+        init_done = true;
+    }
+
+    preset_inputs_loop();
+    bank_inputs_loop();
+    screens_update_loop();
 }
