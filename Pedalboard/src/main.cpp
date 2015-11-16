@@ -7,26 +7,40 @@
 #define P1  8
 #define P2  9
 
-DigitDisplay display(5, 6, 7, 8, 9, 10, 11, 12);
+DigitDisplay display(5, 6, 7, 8, 9, 10, 11, 12); /**< The digit display */
 
-LiquidCrystal s1 = LiquidCrystal(36, 37, 38, 26, 27, 28, 29);
-LiquidCrystal s2 = LiquidCrystal(40, 41, 42, 30, 31, 32, 33);
+LiquidCrystal s1 = LiquidCrystal(36, 37, 38, 26, 27, 28, 29); /**< Screen 1*/
+LiquidCrystal s2 = LiquidCrystal(40, 41, 42, 30, 31, 32, 33); /**< Screen 2 */
 
-LiquidCrystal* screens[BANK_COUNT] = { &s1, &s2 };
+LiquidCrystal* screens[BANK_COUNT] = { &s1, &s2 }; /**< Array of Screens */
 
-int preset_inputs[PRESET_COUNT] = { 46, 47 };
-int bank_inputs[2] = { 48, 49 };
+int preset_inputs[PRESET_COUNT] = { 46, 47 }; /**< Array of digital inputs for
+    preset buttons */
+int bank_inputs[2] = { 48, 49 }; /**< Array of digital inputs for banks */
 
-int bank = 1;
-int current_preset = 0;
-bool init_done = false;
-bool screen_update = false;
-char presets[BANK_COUNT * PRESET_COUNT * PRESET_NAME_LEN];
+int bank = 1; /**< Current bank. Starts at 1 and is in [1; BANK_COUNT[
+    interval */
+int current_preset = 0; /**< Current preset on bank. Starts at 0 and is in
+    [0; PRESET_COUNT[ interval*/
+bool init_done = false; /**< Boolean value to wait for the init(first preset
+    loading) */
+bool screen_update = false; /**< Boolean value to know when to update LCD
+    screens */
+char presets[BANK_COUNT * PRESET_COUNT * PRESET_NAME_LEN]; /**< Preset names
+    array. Gets initialized after after first preset name loading. */
 
+/**
+* \brief Reads the preset names datas on serial and updates presets.
+* \author PinkPR
+* \warning If the connection gets lost while reading, the pedalboard gets
+*   locked in an infinite loop and must be restarted.
+*/
 void get_data()
 {
     delay(100);
     Serial.read();
+    pinMode(2, OUTPUT);
+    digitalWrite(2, HIGH);
 
     for (int i = 0; i < (BANK_COUNT * PRESET_COUNT * PRESET_NAME_LEN); i++)
     {
@@ -35,6 +49,7 @@ void get_data()
         if (presets[i] == -1)
             i--;
     }
+    digitalWrite(2, LOW);
 
     bank = 1;
     display.print(bank);
@@ -49,6 +64,11 @@ void get_data()
     screen_update = true;
 }
 
+/**
+* \brief Poll for a bank update. Read on digital bank inputs and update if
+*   needed.
+* \author PinkPR
+*/
 void bank_inputs_loop()
 {
     if (digitalRead(bank_inputs[0]))
@@ -71,6 +91,11 @@ void bank_inputs_loop()
     display.print(bank);
 }
 
+/**
+* \brief Poll for a preset update. Read on digital preset inputs and update if
+*   needed and sends update to master.
+* \author PinkPR
+*/
 void preset_inputs_loop()
 {
     for (int i = 0; i < PRESET_COUNT; i++)
@@ -86,6 +111,10 @@ void preset_inputs_loop()
     }
 }
 
+/**
+* \brief Poll for a screen update. If needed, display new preset names.
+* \author PinkPR
+*/
 void screens_update_loop()
 {
     if (!screen_update)
@@ -101,6 +130,12 @@ void screens_update_loop()
     }
 }
 
+/**
+* \brief Arduino main init loop.
+* \author PinkPR
+*
+* Init serial, LCD screens, digit display, and pin in/out modes.
+*/
 void setup()
 {
     Serial.begin(115200);
@@ -121,6 +156,12 @@ void setup()
     pinMode(bank_inputs[1], INPUT);
 }
 
+/**
+* \brief Arduino main loop.
+* \author PinkPR
+*
+* Poll for master requests.
+*/
 void loop()
 {
     if (!init_done)
