@@ -4,9 +4,6 @@
 #include "Pedalboard.h"
 #include "DigitDisplay.h"
 
-#define P1  8
-#define P2  9
-
 DigitDisplay display(5, 6, 7, 8, 9, 10, 11, 12); /**< The digit display */
 
 LiquidCrystal s1 = LiquidCrystal(36, 37, 38, 26, 27, 28, 29); /**< Screen 1*/

@@ -3,8 +3,12 @@
 
 # include <Arduino.h>
 
-# define PRINT_POINT  10
+# define PRINT_POINT  10/**<Magic number defining print point instruction */
 
+/** @defgroup display_en_segments Segments Enabled for Displaying Digits
+    Defines segments to be enabled on display to represent digits
+    @{
+*/
 # define ONE    { 1, 1, 0, 1, 0, 1, 1, 1 }
 # define TWO    { 0, 0, 1, 1, 0, 0, 1, 0 }
 # define THREE  { 1, 0, 0, 1, 0, 0, 1, 0 }
@@ -15,6 +19,9 @@
 # define EIGHT  { 0, 0, 0, 1, 0, 0, 0, 0 }
 # define NINE   { 1, 0, 0, 1, 0, 0, 0, 0 }
 # define POINT  { 1, 1, 1, 0, 1, 1, 1, 1 }
+/**
+    @}
+*/
 
 /**
 * \class DigitDisplay DigitDisplay.h

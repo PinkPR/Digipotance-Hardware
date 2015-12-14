@@ -1,5 +1,8 @@
 #include "DigitDisplay.h"
 
+/**
+    Defines digit display enabled segments for each digit
+*/
 int digits[][8] = { ONE, TWO, THREE, FOUR, FIVE, SIX, SEVEN, EIGHT, NINE, POINT };
 
 DigitDisplay::DigitDisplay(int p1,

@@ -3,18 +3,22 @@
 
 #include "EHX_The_Mole.h"
 
-#define LED_MANUAL  8
+#define LED_MANUAL  8 /**<Manual mode indicator led pin */
 
-bool manual = true;
-long pot_vals[POT_CNT];
-bool btn_vals[BTN_CNT];
-long pot_preset_vals[POT_CNT];
-long btn_preset_vals[BTN_CNT];
+bool manual = true;/**<Enable or disable manual mode */
+long pot_vals[POT_CNT];/**<Global pots values */
+bool btn_vals[BTN_CNT];/**<Global buttons values */
+long pot_preset_vals[POT_CNT];/**<Global preset values for pots */
+long btn_preset_vals[BTN_CNT];/**<Gloval preset values for buttons */
 
 /*DEF_MAKE_S_NAME
 DEF_MAKE_REQ_INFO_MSG(POT_CNT, BTN_CNT)
 DEF_MAKE_GET_STATE_REQ(POT_CNT, BTN_CNT)*/
 
+/**
+*   \brief reads analog pot value
+*   \author PinkPR
+*/
 long readPot(int analogPin, float r)
 {
     float p = float(analogRead(analogPin));
@@ -22,11 +26,19 @@ long readPot(int analogPin, float r)
     return long(((1024.0 - p) / 1024.0) * r);
 }
 
+/**
+*   \brief reads analog button value
+*   \author PinkPR
+*/
 bool readBtn(int analogPin)
 {
     return analogRead(analogPin) > 10;
 }
 
+/**
+*   \brief Builder of struct s_dpot
+*   \author PinkPR
+*/
 struct s_dpot
 init_dpot(bool pot_type,
           long max_resistor,
@@ -55,6 +67,10 @@ init_dpot(bool pot_type,
     return dpot;
 }
 
+/**
+*   \brief Builder of struct s_pot
+*   \author PinkPR
+*/
 struct s_pot
 init_pot(int analog_pin,
          int cs_pin,
@@ -77,6 +93,10 @@ init_pot(int analog_pin,
     return pot;
 }
 
+/**
+*   \brief Builder for struct s_btn
+*   \author PinkPR
+*/
 struct s_btn
 init_btn(int digital_pin,
          int digital_input,
@@ -99,6 +119,11 @@ init_btn(int digital_pin,
     return btn;
 }
 
+/**
+*   \brief Parse a set_state message on serial and returns it as a struct
+*       s_set_state_msg
+*   \author PinkPR
+*/
 struct s_set_state_msg
 parse_set_state_msg()
 {
@@ -125,6 +150,10 @@ parse_set_state_msg()
     return msg;
 }
 
+/**
+*   \brief Build a struct s_req_info_msg
+*   \author PinkPR
+*/
 struct s_req_info_msg
 make_req_info_msg(void)
 {
@@ -150,6 +179,10 @@ make_req_info_msg(void)
     return msg;
 }
 
+/**
+*   \brief Build a struct s_req_state_msg
+*   \author PinkPR
+*/
 struct s_req_state_msg
 make_req_state_msg(void)
 {
@@ -177,6 +210,10 @@ make_req_state_msg(void)
     return msg;
 }
 
+/**
+*   \brief Write a value on a digipot
+*   \author PinkPR
+*/
 void writeDigiPot(struct s_pot pot, long value)
 {
     // false --> simple digipot
@@ -216,6 +253,10 @@ void writeDigiPot(struct s_pot pot, long value)
     digitalWrite(pot.cs_pin, HIGH);
 }
 
+/**
+*   \brief Write a value on a digipot as a percentage of its maximal value
+*   \author PinkPR
+*/
 void writeDigiPotPercent(struct s_pot pot, unsigned int val)
 {
     if (val > 100)
@@ -227,6 +268,11 @@ void writeDigiPotPercent(struct s_pot pot, unsigned int val)
     writeDigiPot(pot, resistor * float(val) / 100.0);
 }
 
+/**
+*   \brief Enable or disable button
+*   \author PinkPR
+*   \warning Only works for Behringer/Boss switch type
+*/
 void writeBtn(struct s_btn btn, bool on)
 {
     // behringer type
@@ -243,6 +289,10 @@ void writeBtn(struct s_btn btn, bool on)
     // TODO : normal switch
 }
 
+/**
+*   \brief returns which percent of max value is this absolute value
+*   \author PinkPR
+*/
 long get_percent(struct s_pot pot, long r)
 {
     float val = float(r);
@@ -250,6 +300,10 @@ long get_percent(struct s_pot pot, long r)
     return long(val);
 }
 
+/**
+*   \brief Applies an entire preset (pots + buttons)
+*   \author PinkPR
+*/
 void apply_preset(struct s_set_state_msg msg)
 {
     int value = 0;
@@ -268,6 +322,10 @@ void apply_preset(struct s_set_state_msg msg)
     }
 }
 
+/**
+*   \brief Arduino init function
+*   \author PinkPR
+*/
 void setup()
 {
     Serial.begin(115200);
@@ -289,6 +347,10 @@ void setup()
     pinMode(7, OUTPUT);
 }
 
+/**
+*   \brief Loop code for manual mode
+*   \author PinkPR
+*/
 void manual_loop()
 {
     float ratio = 0.0;
@@ -304,7 +366,7 @@ void manual_loop()
 
         manual = true;
         pots[i].current_value = pot_vals[i];
-        writeDigiPot(pots[i], pots[i].ohmm_resistor - pot_vals[i]);
+        writeDigiPot(pots[i], /*pots[i].ohmm_resistor - */pot_vals[i]);
     }
 
     for (int i = 0; i < BTN_CNT; i++)
@@ -319,9 +381,14 @@ void manual_loop()
     }
 }
 
+/**
+*   \brief Arduino main loop function
+*   \author PinkPR
+*/
 void loop()
 {
     digitalWrite(LED_MANUAL, manual);
+    digitalWrite(7, btns[0].state);
 
     char req = Serial.read();
     char* data = 0;

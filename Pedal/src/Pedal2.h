@@ -1,3 +1,6 @@
+/**
+*   Defines the s_name builder function
+*/
 #define DEF_MAKE_S_NAME     \
     struct s_name               \
     get_s_name(char* str)       \
@@ -11,6 +14,9 @@
         return name;            \
     }
 
+/**
+*   Defines the s_req_info_msg builder function
+*/
 #define DEF_MAKE_REQ_INFO_MSG(p_cnt, b_cnt)   \
     struct s_req_info_msg                       \
     make_req_info_msg(struct s_pot *pots,       \
@@ -39,6 +45,9 @@
         return msg;                             \
     }
 
+/**
+*   Defines the s_req_state_msg builder function
+*/
 #define DEF_MAKE_GET_STATE_REQ(p_cnt, b_cnt)  \
     struct s_req_state_msg                      \
     make_req_state_msg(char *pot_values,        \

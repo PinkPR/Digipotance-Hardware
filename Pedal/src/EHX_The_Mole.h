@@ -3,9 +3,12 @@
 
 # include "Pedal.h"
 
-# define POT_CNT    3
-# define BTN_CNT    1
+# define POT_CNT    3 /**<Number of digipots on the pedal */
+# define BTN_CNT    1 /**<Number of emulated buttons on the pedal */
 
+/**
+*   Init pots array
+*/
 # define INIT_POTS()        \
     pots[0] = init_pot(A0,  \
                        3,   \
@@ -24,11 +27,14 @@
                        100000L,     \
                        "Volume");
 
+/**
+*   Init buttons array
+*/
 # define INIT_BTNS()        \
     btns[0] = init_btn(6, 9, A3, false, "Power");
 
-struct s_pot pots[POT_CNT];
-struct s_btn btns[BTN_CNT];
+struct s_pot pots[POT_CNT]; /**<pots array */
+struct s_btn btns[BTN_CNT]; /**<buttons array */
 
 DEF_STRUCT_SET_STATE_MSG(POT_CNT, BTN_CNT)
 DEF_STRUCT_SET_INFO_REQ(POT_CNT, BTN_CNT)

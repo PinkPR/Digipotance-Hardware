@@ -3,10 +3,12 @@
 
 # include "DigitDisplay.h"
 
-# define PRESET_NAME_LEN    17
-# define PRESET_COUNT       2
-# define BANK_COUNT         9
+# define PRESET_NAME_LEN    17 /**< Max preset name length including null
+    terminating character */
+# define PRESET_COUNT       2 /**< Preset count per bank */
+# define BANK_COUNT         9 /**< Bank count */
 
+/*
 struct preset_name
 {
     char name[PRESET_NAME_LEN];
@@ -27,5 +29,6 @@ struct req_preset_msg
 {
     char preset_nb;
 } __attribute__((__packed__));
+*/
 
 #endif /* PEDALBOARD_H */

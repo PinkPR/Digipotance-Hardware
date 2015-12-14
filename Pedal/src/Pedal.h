@@ -38,9 +38,12 @@
  *
  */
 
-# define NAME_MAX_SIZE      16
-# define LF                 '\n'
+# define NAME_MAX_SIZE      16 /**< Max size of pedal name */
+# define LF                 '\n' /**< shortcut for printing linefeed character */
 
+/**
+*   Defines struct for a name
+*/
 # define DEF_STRUCT_NAME_ARRAY(n)   \
     struct s_name                   \
     {                               \
@@ -49,6 +52,9 @@
 
 DEF_STRUCT_NAME_ARRAY(NAME_MAX_SIZE)
 
+/**
+*   Defines struct for set_state message
+*/
 # define DEF_STRUCT_SET_STATE_MSG(p_cnt, b_cnt) \
     struct s_set_state_msg                      \
     {                                           \
@@ -58,6 +64,9 @@ DEF_STRUCT_NAME_ARRAY(NAME_MAX_SIZE)
         char linefeed2;                         \
     } __attribute__((__packed__));
 
+/**
+*   Defines struct for set_info request
+*/
 # define DEF_STRUCT_SET_INFO_REQ(p_cnt, b_cnt)  \
     struct s_req_info_msg                       \
     {                                           \
@@ -73,6 +82,9 @@ DEF_STRUCT_NAME_ARRAY(NAME_MAX_SIZE)
         char linefeed5;                         \
     } __attribute__((__packed__));
 
+/**
+*   Defines struct for get_state request
+*/
 # define DEF_STRUCT_GET_STATE_REQ(p_cnt, b_cnt) \
     struct s_req_state_msg                      \
     {                                           \
@@ -84,18 +96,27 @@ DEF_STRUCT_NAME_ARRAY(NAME_MAX_SIZE)
         char linefeed3;                         \
     } __attribute__((__packed__));
 
+/**
+*   struct defining a simple digipot
+*/
 struct s_simple_dpot
 {
     int range;
     long max_resistor;
 };
 
+/**
+*   struct defining a double digipot
+*/
 struct s_double_dpot
 {
     int range;
     long max_resistor;
 };
 
+/**
+*   struct defining a digipot
+*/
 struct s_dpot
 {
     int sdpot_cnt;
@@ -105,6 +126,9 @@ struct s_dpot
     struct s_double_dpot ddpots[5];
 };
 
+/**
+*   struct defining a digipot associated to an analog pot
+*/
 struct s_pot
 {
     struct s_dpot dpot;
@@ -117,6 +141,9 @@ struct s_pot
 
 // type :   true    -> normal switch
 //          false   -> behringer switch
+/**
+*   struct defining an emulated button associated to an analog button
+*/
 struct s_btn
 {
     int digital_pin;
