@@ -101,7 +101,7 @@ void preset_inputs_loop()
         {
             current_preset = i;
             Serial.print("S\n");
-            Serial.print((char) (bank - 1) * PRESET_COUNT + current_preset);
+            Serial.print((char) ((bank - 1) * PRESET_COUNT + current_preset));
             Serial.print('\n');
             delay(500);
         }
