@@ -1,7 +1,7 @@
 #include <Arduino.h>
 #include <SPI.h>
 
-#include "EHX_The_Mole.h"
+#include "Joyo_JF_33.h"
 
 #define LED_MANUAL  8 /**<Manual mode indicator led pin */
 
@@ -166,6 +166,8 @@ make_req_info_msg(void)
     msg.linefeed2 = LF;
     msg.linefeed4 = LF;
     msg.linefeed5 = LF;
+    msg.linefeed6 = LF;
+    msg.linefeed7 = LF;
 
     for (int i = 0; i < POT_CNT; i++)
         strcpy((char*) &(msg.pot_names[i]), pots[i].name);
@@ -175,6 +177,9 @@ make_req_info_msg(void)
 
     for (int i = 0; i < BTN_CNT; i++)
         strcpy((char*) &(msg.btn_names[i]), btns[i].name);
+
+    strcpy(msg.pedal_brand, PEDAL_BRAND);
+    strcpy(msg.pedal_model, PEDAL_MODEL);
 
     return msg;
 }
@@ -285,6 +290,14 @@ void writeBtn(struct s_btn btn, bool on)
             delay(100);
         }
     }
+    // Normal type
+    else
+    {
+        if (on)
+            digitalWrite(btn.digital_pin, HIGH);
+        else
+            digitalWrite(btn.digital_pin, LOW);
+    }
 
     // TODO : normal switch
 }
@@ -358,6 +371,8 @@ void manual_loop()
 
     for (int i = 0; i < POT_CNT; i++)
     {
+        /*writeDigiPotPercent(pots[i], 0);
+        continue;*/
         pot_vals[i] = readPot(pots[i].analog_pin, float(pots[i].ohmm_resistor));
         percent = get_percent(pots[i], pot_vals[i]);
 
@@ -366,7 +381,7 @@ void manual_loop()
 
         manual = true;
         pots[i].current_value = pot_vals[i];
-        writeDigiPot(pots[i], /*pots[i].ohmm_resistor - */pot_vals[i]);
+        writeDigiPot(pots[i], pot_vals[i]);
     }
 
     for (int i = 0; i < BTN_CNT; i++)

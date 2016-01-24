@@ -78,8 +78,12 @@ DEF_STRUCT_NAME_ARRAY(NAME_MAX_SIZE)
         char linefeed3;                         \
         char btn_cnt;                           \
         char linefeed4;                         \
-        char* btn_names[b_cnt];                 \
+        struct s_name btn_names[b_cnt];         \
         char linefeed5;                         \
+        char pedal_brand[NAME_MAX_SIZE];        \
+        char linefeed6;                         \
+        char pedal_model[NAME_MAX_SIZE];        \
+        char linefeed7;                         \
     } __attribute__((__packed__));
 
 /**
